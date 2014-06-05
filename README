@@ -1,0 +1,41 @@
+sendd0.4
+=======
+This an implementation of Secure Neighbor Discovery (SEND), IETF RTF 3971.
+This implementation is based on send0.2 from DoCoMo SEND project.
+
+DEPENDANCIES
+============
+Here is a quick summary of what you will need to build SEND on your system.
+
+All platforms:
+  o GNU make
+  o GCC
+  o lex
+  o yacc
+  o libcrypto 1.0.1g (library and headers) or newer
+  o (Optional) libreadline, libncurses (libraries and headers)
+
+Linux:
+  o Linux kernel 2.6.14 (headers)
+  o CONFIG_NETFILTER, CONFIG_IPV6, CONFIG_IP6_NF_QUEUE, CONFIG_IP6_NF_IPTABLES,
+    CONFIG_IP6_NF_FILTER enabled in your kernel config.
+  o (Optional) ip6tables command
+  o libnetfilter_queue library and headers
+
+QUICK START
+===========
+1. make
+
+2. make install
+
+3. insmod sendd/os-linux/mod/send.ko
+
+3. Generate keys and CGA paramaters using cgatool.
+
+4. cp examples/sendd.conf /etc/sendd.conf.
+
+5. Edit /etc/sendd.conf.
+
+6. Run sendd.
+
+Questions, comments or feedback: send to <https://github.com/LucasBe/sendd>
