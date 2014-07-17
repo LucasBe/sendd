@@ -178,18 +178,23 @@ int snd_replace_non_cga_linklocals()
 	list_for_each_entry(addr, &ip6addrs.list, head) {
     if(addr->iface) {
     	DBG(&dbg, "%s/%d (%d)", addr->saddr, addr->prefix_len, addr->iface->ifi);
+      if(!addr->iface->send_enabled) {
+        DBG(&dbg, "SEND on interface %d is not enabled, skipping", addr->iface->ifi);
+        continue;
+      }
+      
       if (addr->cga_params) {
-    		DBG(&dbg, "address is already CGA");
+    		DBG(&dbg, "address is already CGA, skipping");
     		continue;
        }        
   
     	if (IN6_IS_ADDR_LOOPBACK(&addr->addr)) {
-    		DBG(&dbg, "skipping loopback");
+    		DBG(&dbg, "address is loopback, skipping");
     		continue;
     	}
     
     	if (addr->prefix_len != 64) {
-    		DBG(&dbg, "prefix length != 64 bits; skipping");
+    		DBG(&dbg, "prefix length != 64 bits, skipping");
     		continue;
     	}	
       if (gen_linklocal_cga(cga_addr, addr->iface->ifi) < 0) {
@@ -312,8 +317,16 @@ void snd_enable_all()
 {
   struct s_iface *iface;
   list_for_each_entry(iface, &ifaces.list, head) {
-    iface->send_enabled = TRUE;
-    DBG(&dbg, "SEND enabled on interface %d", iface->ifi);
+    if(iface->flags & IFF_LOOPBACK) {
+      DBG(&dbg, "interface %d is loopback, skipping", iface->ifi);
+      continue;
+    }
+    if(iface->flags & IFF_UP) {
+      iface->send_enabled = TRUE;
+      DBG(&dbg, "SEND enabled on interface %d", iface->ifi);
+    } else {
+      DBG(&dbg, "interface %d is not UP, skipping", iface->ifi);
+    }
 	}  
 }
 
@@ -322,7 +335,10 @@ void snd_dump_ifaces()
 	struct s_iface *iface;
 
 	list_for_each_entry(iface, &ifaces.list, head) {
-		printf("\t  %d:%-17s%-14s\n", iface->ifi, iface->name, iface->send_enabled ? "SEND enabled" : "");
+		printf("\t  %d:%-17s%s%s%s\n", iface->ifi, iface->name,
+      iface->flags & IFF_UP ? "up " : "",
+      iface->flags & IFF_LOOPBACK ? "loopback " : "",
+      iface->send_enabled ? "send" : "");
 	}
 }
 

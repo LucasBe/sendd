@@ -50,7 +50,7 @@
 
 struct snd_named_params {
 	struct list_head	list;
-	const char *		name;
+	char *name;
 	int			free_params;
 	const char		*using;
 	struct snd_cga_params	*params;
@@ -71,15 +71,13 @@ static htbl_t *addr_params;
 extern FILE *params_in;
 extern int params_parse(void);
 
-static uint32_t
-hash_ent(void *a, int sz)
+static uint32_t hash_ent(void *a, int sz)
 {
 	struct snd_addr_params *p = a;
 	return (hash_in6_addr(&p->addr, sz));
 }
 
-static int
-match_ent(void *a, void *b)
+static int match_ent(void *a, void *b)
 {
 	struct snd_addr_params *x = a;
 	struct snd_addr_params *y = b;
@@ -90,8 +88,7 @@ match_ent(void *a, void *b)
 	return (memcmp(&x->addr, &y->addr, sizeof (x->addr)));
 }
 
-static struct snd_addr_params *
-find_params_byaddr(struct in6_addr *a, int ifidx)
+static struct snd_addr_params *find_params_byaddr(struct in6_addr *a, int ifidx)
 {
 	struct snd_addr_params k[1];
 	k->addr = *a;
@@ -99,8 +96,7 @@ find_params_byaddr(struct in6_addr *a, int ifidx)
 	return (htbl_find(addr_params, k));
 }
 
-static struct snd_named_params *
-find_params_byname(const char *name)
+static struct snd_named_params *find_params_byname(const char *name)
 {
 	struct snd_named_params *p;
 
@@ -113,8 +109,7 @@ find_params_byname(const char *name)
 	return (NULL);
 }
 
-struct snd_cga_params *
-snd_find_params_byaddr(struct in6_addr *a, int ifidx)
+struct snd_cga_params *snd_find_params_byaddr(struct in6_addr *a, int ifidx)
 {
 	struct snd_addr_params *p;
 
@@ -144,16 +139,14 @@ struct snd_cga_params *snd_find_params_byifidx(int ifidx)
 /* XXX now that we can delete arbitrary params, we need to refcnt each
  * usage of a set of given params
  */
-static void
-free_cga_params(struct snd_cga_params *p)
+static void free_cga_params(struct snd_cga_params *p)
 {
 	if (p->der) free(p->der);
 	if (p->key) p->sigmeth->free_key(p->key);
 	free(p);
 }
 
-static void
-free_addr_params(struct snd_addr_params *p)
+static void free_addr_params(struct snd_addr_params *p)
 {
 	if (p->free_params) {
 		snd_put_cga_params(p->params);
@@ -161,17 +154,18 @@ free_addr_params(struct snd_addr_params *p)
 	free(p);
 }
 
-static void
-free_named_params(struct snd_named_params *p)
+static void free_named_params(struct snd_named_params *p)
 {
 	if (p->free_params) {
 		snd_put_cga_params(p->params);
 	}
+  if (p->name) {
+    free(p->name);
+  }
 	free(p);
 }
 
-static int
-add_named_params(const char *name, struct snd_cga_params *params,
+static int add_named_params(const char *name, struct snd_cga_params *params,
     int free_params, const char *use)
 {
 	struct snd_named_params *p;
@@ -187,7 +181,9 @@ add_named_params(const char *name, struct snd_cga_params *params,
 	}
 	memset(p, 0, sizeof (*p));
 
-	if ((p->name = strdup(name)) == NULL) { // XXX need to free this, but be careful dangling refs
+  // "XXX need to free this, but be careful dangling refs"
+  // Luk: Should be fixed now
+	if ((p->name = strdup(name)) == NULL) {
 		free(p);
 		APPLOG_NOMEM();
 		return (SENDDCTL_STATUS_NOMEM);
@@ -201,8 +197,7 @@ add_named_params(const char *name, struct snd_cga_params *params,
 	return (0);
 }
 
-static int
-add_addr_params(struct in6_addr *a, int ifidx,
+static int add_addr_params(struct in6_addr *a, int ifidx,
     struct snd_cga_params *params, int free_params, const char *use)
 {
 	struct snd_addr_params *p;
@@ -230,8 +225,7 @@ add_addr_params(struct in6_addr *a, int ifidx,
 	return (0);
 }
 
-static struct snd_cga_params *
-new_snd_cga_params(uint8_t *der, int dlen, void *key, int sec,
+static struct snd_cga_params *new_snd_cga_params(uint8_t *der, int dlen, void *key, int sec,
     struct snd_sig_method *m, enum senddctl_status *status)
 {
 	struct snd_cga_params *p;
@@ -261,8 +255,7 @@ new_snd_cga_params(uint8_t *der, int dlen, void *key, int sec,
 	return (p);
 }
 
-static struct snd_cga_params *
-create_snd_cga_params(const char *name, const char *derfile,
+static struct snd_cga_params *create_snd_cga_params(const char *name, const char *derfile,
     const char *keyfile, int sec, struct snd_sig_method *m,
     enum senddctl_status *status)
 {
@@ -295,8 +288,7 @@ create_snd_cga_params(const char *name, const char *derfile,
 	return (new_snd_cga_params(der, dlen, key, sec, m, status));
 }
 
-int
-snd_add_named_params(const char *name, const char *derfile,
+int snd_add_named_params(const char *name, const char *derfile,
     const char *keyfile, int sec, struct snd_sig_method *m)
 {
 	struct snd_cga_params *p;
@@ -312,8 +304,7 @@ snd_add_named_params(const char *name, const char *derfile,
 	return (st);
 }
 
-int
-snd_add_named_params_use(const char *name, const char *use)
+int snd_add_named_params_use(const char *name, const char *use)
 {
 	struct snd_named_params *p;
 	enum senddctl_status st;
@@ -331,8 +322,7 @@ snd_add_named_params_use(const char *name, const char *use)
 	return (st);
 }
 
-int
-snd_add_addr_params(struct in6_addr *a, int ifidx, const char *derfile,
+int snd_add_addr_params(struct in6_addr *a, int ifidx, const char *derfile,
     const char *keyfile, int sec, struct snd_sig_method *m)
 {
 	struct snd_cga_params *p;
@@ -348,8 +338,7 @@ snd_add_addr_params(struct in6_addr *a, int ifidx, const char *derfile,
 	return (st);
 }
 
-int
-snd_add_addr_params_use(struct in6_addr *a, int ifidx, const char *use)
+int snd_add_addr_params_use(struct in6_addr *a, int ifidx, const char *use)
 {
 	struct snd_named_params *p;
 	enum senddctl_status st;
@@ -366,8 +355,7 @@ snd_add_addr_params_use(struct in6_addr *a, int ifidx, const char *use)
 	return (st);
 }
 
-int
-snd_del_addr_params(struct in6_addr *a, int ifidx)
+int snd_del_addr_params(struct in6_addr *a, int ifidx)
 {
 	struct snd_addr_params *p;
 
@@ -382,8 +370,7 @@ snd_del_addr_params(struct in6_addr *a, int ifidx)
 	return (0);
 }
 
-int
-snd_del_named_params(const char *name)
+int snd_del_named_params(const char *name)
 {
 	struct snd_named_params *p;
 
@@ -400,8 +387,7 @@ snd_del_named_params(const char *name)
 	return (0);
 }
 
-static int
-read_cga_params(void)
+static int read_cga_params(void)
 {
 	const char *f = snd_conf_get_str(snd_cga_params);
 
@@ -423,14 +409,12 @@ read_cga_params(void)
 	return (0);
 }
 
-void
-snd_hold_cga_params(struct snd_cga_params *p)
+void snd_hold_cga_params(struct snd_cga_params *p)
 {
 	p->refcnt++;
 }
 
-void
-snd_put_cga_params(struct snd_cga_params *p)
+void snd_put_cga_params(struct snd_cga_params *p)
 {
 	p->refcnt--;
 	if (p->refcnt == 0) {
@@ -438,8 +422,7 @@ snd_put_cga_params(struct snd_cga_params *p)
 	}
 }
 
-static void
-hexdump(uint8_t *b, int len, char *indent)
+static void hexdump(uint8_t *b, int len, char *indent)
 {
 	int i;
 
@@ -458,16 +441,14 @@ hexdump(uint8_t *b, int len, char *indent)
 	printf("\n");
 }
 
-static void
-dump_cga_params(struct snd_cga_params *p)
+static void dump_cga_params(struct snd_cga_params *p)
 {
 	printf("\tref: %d sig method: %s (%d)\n", p->refcnt, p->sigmeth->name,
 	       p->sigmeth->type);
 	hexdump(p->der, 16, "\t");
 }
 
-static void
-dump_walker(void *p, void *c)
+static void dump_walker(void *p, void *c)
 {
 	struct snd_addr_params *pa = p;
 	char abuf[INET6_ADDRSTRLEN];
@@ -481,8 +462,7 @@ dump_walker(void *p, void *c)
 	}
 }
 
-void
-snd_dump_params(void)
+void snd_dump_params(void)
 {
 	struct snd_named_params *pn;
 
@@ -498,8 +478,7 @@ snd_dump_params(void)
 	htbl_walk(addr_params, dump_walker, NULL);
 }
 
-int
-snd_params_init(void)
+int snd_params_init(void)
 {
 	if ((addr_params = htbl_create(SND_HASH_SZ, hash_ent, match_ent))
 	    == NULL) {
@@ -517,8 +496,7 @@ snd_params_init(void)
 	return (0);
 }
 
-void
-snd_params_fini(void)
+void snd_params_fini(void)
 {
 	// XXX improve cleanup - list too
 	if (addr_params) htbl_destroy(addr_params, free);

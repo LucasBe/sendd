@@ -84,6 +84,7 @@ static int linux_handle_iface(struct nl_msg *iface_msg)
   }
 #endif
 
+  iface->flags = ifinfo->ifi_flags;
   
   len = NLMSG_PAYLOAD(iface_msg->hdr, sizeof(struct ifinfomsg));
   for (rta = IFLA_RTA(ifinfo); RTA_OK(rta, len); rta = RTA_NEXT(rta, len))
@@ -102,7 +103,7 @@ static int linux_handle_iface(struct nl_msg *iface_msg)
         //DBG(&dbg_net,"interface %d: unknown attribute %d", iface->ifi, rta->rta_type);
     	  break;
   	}
-  }  
+  }
   
   return SUCCESS;
 }
@@ -182,11 +183,11 @@ static int linux_handle_addr(struct nl_msg *addr_msg)
   }
 
   ip6addr->flags = addr_info->ifa_flags; /* update flags only */ 
-  if(ip6addr->flags && IFA_F_TENTATIVE) {
+  if(ip6addr->flags & IFA_F_TENTATIVE) {
     DBG(&dbg_net, "DAD working, address still tentative");
-  } else if(ip6addr->flags && IFA_F_PERMANENT) {
+  } else if(ip6addr->flags & IFA_F_PERMANENT) {
     DBG(&dbg_net, "DAD completed, address is unique");
-  } else if(ip6addr->flags && IFA_F_DADFAILED) {
+  } else if(ip6addr->flags & IFA_F_DADFAILED) {
     DBG(&dbg_net, "DAD completed, duplicated address detected");
   } else {
     DBG(&dbg_net, "DAD disabled?");

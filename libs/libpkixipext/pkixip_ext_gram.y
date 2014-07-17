@@ -44,8 +44,8 @@
 
 int linecnt;
 
-extern char *pkixip_text;
-extern int pkixip_lex(void);
+extern char *pkixip_ext_text;
+extern int pkixip_ext_lex(void);
 
 extern IPAddrBlocks *parse_ipb;
 static IPAddressFamily *ipf;
@@ -309,7 +309,7 @@ range6			: T_RANGE T_IPV6_ADDR '/' T_NUMBER T_IPV6_ADDR '/' T_NUMBER ';'
 %%
 
 int
-pkixip_wrap(void)
+pkixip_ext_wrap(void)
 {
 	return (1);
 }
@@ -317,7 +317,7 @@ pkixip_wrap(void)
 static void
 yyerror(char *msg)
 {
-	fprintf(stderr, "error: %s, line %d: %s\n", msg, linecnt, pkixip_text);
+	fprintf(stderr, "error: %s, line %d: %s\n", msg, linecnt, pkixip_ext_text);
 	IPAddrBlocks_free(parse_ipb);
 	parse_ipb = NULL;
 }
@@ -332,7 +332,7 @@ cleanup(void)
 static void
 explain(void)
 {
-	fprintf(stderr, "aborting at line %d: %s\n", linecnt, pkixip_text);
+	fprintf(stderr, "aborting at line %d: %s\n", linecnt, pkixip_ext_text);
 }
 
 static void

@@ -40,8 +40,7 @@
 const char *pkixip_version =
 	"DoCoMo PKIX IP Extensions library 0.0 (rfc3779)";
 
-int
-pkixip_init(void)
+int pkixip_init()
 {
 	OpenSSL_add_all_algorithms();
 	ERR_load_crypto_strings();
@@ -57,5 +56,11 @@ pkixip_init(void)
 		return (-1);
 	}
 
-	return (0);
+	return 0;
 }
+
+void pkixip_free()
+{
+  pkixip_x509_free();
+}
+

@@ -70,7 +70,7 @@
 struct snd_cga_params;
 
 struct snd_sig_method {
-	uint8_t		*(*sign)(struct iovec *, int, int *, void *);
+	uint8_t		*(*sign)(struct iovec *, int, unsigned int *, void *);
 	int		(*verify)(struct iovec *, int, uint8_t *, int,
 				  uint8_t *, int);
 	void		*(*load_key)(const char *);
@@ -156,7 +156,7 @@ extern int snd_add_cert_opt(struct sbuff *, void *);
 extern int snd_add_cga_opt(struct sbuff *, uint8_t *, int);
 extern int snd_add_nonce_opt(struct sbuff *, uint8_t *, int);
 extern int snd_add_timestamp_opt(struct sbuff *);
-extern int snd_add_sig_opt(struct sbuff *, uint8_t *, uint8_t *, int, uint8_t);
+extern int snd_add_sig_opt(struct sbuff *, uint8_t *, uint8_t *, unsigned int, uint8_t);
 extern int snd_add_trustanchor_opt(struct sbuff *, void *);
 extern int snd_init_opt(void);
 

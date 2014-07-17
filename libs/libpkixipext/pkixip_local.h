@@ -40,9 +40,10 @@
 extern X509V3_EXT_METHOD pkix_ip_ext_method;
 
 extern void pkixip_ssl_err(const char *, const char *);
-extern int pkixip_config_init(void);
-extern int pkixip_verify_init(void);
-extern int pkixip_x509_init(void);
+extern int pkixip_config_init();
+extern int pkixip_verify_init();
+extern int pkixip_x509_init();
+extern void pkixip_x509_free();
 extern int af_match(IPAddressFamily *, IPAddressFamily *);
 
 #endif	/* _PKIXIP_LOCAL_H */

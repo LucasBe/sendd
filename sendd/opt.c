@@ -101,7 +101,7 @@ snd_get_opt(uint8_t *opts, int olen, int type)
 }
 
 static void
-ndisc_fill_option(uint8_t *opt, int type, void *data, int data_len, int space)
+ndisc_fill_option(uint8_t *opt, int type, void *data, unsigned int data_len, int space)
 {
 	opt[0] = type;
 	opt[1] = space >> 3;
@@ -192,7 +192,7 @@ snd_add_nonce_opt(struct sbuff *b, uint8_t *nonce, int nlen)
 }
 
 int
-snd_add_sig_opt(struct sbuff *b, uint8_t *kh, uint8_t *sig, int slen,
+snd_add_sig_opt(struct sbuff *b, uint8_t *kh, uint8_t *sig, unsigned int slen,
     uint8_t type)
 {
 	uint8_t *p;

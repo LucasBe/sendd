@@ -207,6 +207,7 @@ void
 console_exit(void)
 {
 #ifdef	USE_READLINE
+  rl_callback_handler_remove();
 #if RL_VERSION_MAJOR >= 4
 	rl_cleanup_after_signal();
 #endif

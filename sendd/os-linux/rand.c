@@ -56,14 +56,23 @@
 
 #include "../os_specific.h"
 #include "../sendd_local.h"
+#include "snd_linux.h"
 
 #define	SND_RAND_BUFSIZ	2048
 
 static uint8_t *rand_buf;
 static int rand_off;
 
-static int
-fill_rand_buf(void *c)
+#ifdef DEBUG
+#include "../dbg.h"
+
+static struct dlog_desc dbg_rand = {
+	.desc =	"random",
+	.ctx =	SND_OS_NAME
+};
+#endif
+
+static int fill_rand_buf(void *c)
 {
 	int fd = open("/dev/urandom", O_RDONLY);
 
@@ -85,8 +94,7 @@ fill_rand_buf(void *c)
 	return (0);
 }
 
-static inline int
-start_rand_update(void)
+static inline int start_rand_update()
 {
 	return (thrpool_req((void *)fill_rand_buf, NULL, NULL, 0));
 }
@@ -99,8 +107,7 @@ start_rand_update(void)
  *
  * returns 0 on success, -1 on failure
  */
-int
-os_specific_get_rand_bytes(void *b, int num)
+int os_specific_get_rand_bytes(void *b, int num)
 {
 	int off = rand_off;
 	int r = 0;
@@ -116,22 +123,32 @@ os_specific_get_rand_bytes(void *b, int num)
 	return (r);
 }
 
-int
-linux_rand_init(void)
+int linux_rand_init()
 {
 #ifdef DEBUG
-	applog(LOG_ERR, "linux_rand_init");
+  struct dlog_desc *dbgs[] = {
+  	&dbg_rand,
+  	NULL
+  };
+  
+  if (snd_applog_register(dbgs) < 0) {
+  	return FAILURE;
+  }
 #endif
+
 	if ((rand_buf = malloc(SND_RAND_BUFSIZ)) == NULL) {
 		applog(LOG_CRIT, "%s: no memory", __FUNCTION__);
-		return (-1);
+		return FAILURE;
 	}
 
-	return (fill_rand_buf(NULL));
+  if (fill_rand_buf(NULL) != SUCCESS)
+    return FAILURE;
+	
+  DBG(&dbg_rand, "success");
+  return SUCCESS;
 }
 
-void
-linux_rand_fini(void)
+void linux_rand_fini()
 {
 	free(rand_buf);
 }

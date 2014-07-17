@@ -81,8 +81,7 @@ free_privkey(void *k)
 /**
  * Caller must free result
  */
-static uint8_t *
-sign(struct iovec *iov, int iovlen, int *slen, void *priv /* EVP_PKEY */)
+static uint8_t *sign(struct iovec *iov, int iovlen, unsigned int *slen, void *priv /* EVP_PKEY */)
 {
 	EVP_MD_CTX ctx[1];
 	uint8_t *sig = NULL;
@@ -107,23 +106,20 @@ sign(struct iovec *iov, int iovlen, int *slen, void *priv /* EVP_PKEY */)
 		return (NULL);
 	}
 
-	for (i = 0; i < iovlen; i++) {
-		DBG_HEXDUMP(&dbg_cryptox, "data:", iov[i].iov_base,
-			    iov[i].iov_len);
-
-		if (EVP_SignUpdate(ctx, iov[i].iov_base, iov[i].iov_len)
-		    != 1) {
+	for (i = 0; i < iovlen; ++i) {
+		DBG_HEXDUMP(&dbg_cryptox, "data:", iov[i].iov_base, iov[i].iov_len);
+		if (EVP_SignUpdate(ctx, iov[i].iov_base, iov[i].iov_len) != 1) {
 			snd_ssl_err(__FUNCTION__, "EVP_SignUpdate: ");
 			goto done;
 		}
 	}
 
-	if ((sig = calloc(*slen)) == NULL) {
+	if ((sig = malloc(*slen)) == NULL) {
 		applog(LOG_CRIT, "%s: no memory", __FUNCTION__);
 		goto done;
 	}
 
-	if (EVP_SignFinal(ctx, sig, (unsigned int *)slen, priv) != 1) {
+	if (EVP_SignFinal(ctx, sig, slen, priv) != 1) {
 		DBG(&dbg_snd, "sign failed");
 		snd_ssl_err(__FUNCTION__, "EVP_SignFinal: ");
 		free(sig);

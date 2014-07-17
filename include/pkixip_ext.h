@@ -71,7 +71,8 @@ extern int pkixip_read_config(const char *f, struct pkixip_config *,
 extern void pkixip_store_ctx_light_cleanup(X509_STORE_CTX *);
 extern void pkixip_walk_store(int (*)(X509 *, void *), void *, int);
 
-extern int pkixip_init(void);
+extern int pkixip_init();
+extern void pkixip_free();
 extern const char *pkixip_version;
 
 #endif	/* _PKIXIP_EXT_H */

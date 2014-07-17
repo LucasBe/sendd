@@ -79,7 +79,7 @@ void inline linux_nl_serve_fds(fd_set *fds)
 
 int linux_nl_free()
 {
-  if (close(nl.fd) == -1) {
+  if (nl.fd != -1 && close(nl.fd) == -1) {
     applog(LOG_ERR, "%s: close() failed", __FUNCTION__);
     return FAILURE;
   }

@@ -389,7 +389,7 @@ static void outgoing_thr(void *p)
 {
   struct snd_pkt_info *pi = p;
   uint8_t *sig = NULL;
-  int slen;
+  unsigned int slen;
   int drop = 0;
 
   pi->iph->ip6_plen = htons(pi->b->len - sizeof (*pi->iph));

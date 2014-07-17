@@ -138,7 +138,7 @@ extern int snd_proto_cache_nonce(struct in6_addr *, struct in6_addr *, int,
 extern int snd_proto_verify_sig(uint8_t *, uint8_t *, int,
     struct ip6_hdr *, struct icmp6_hdr *, int);
 extern uint8_t *snd_proto_calc_sig(struct ip6_hdr *, struct icmp6_hdr *, int,
-    int *, struct snd_cga_params *);
+    unsigned int *, struct snd_cga_params *);
 extern int snd_timestamp_cache_upd(struct in6_addr *, int, uint64_t, uint64_t);
 extern uint64_t snd_timestamp_get_delta(void);
 extern uint64_t snd_timestamp_get_fuzz(void);

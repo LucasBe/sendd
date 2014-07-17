@@ -65,7 +65,7 @@ ip6addr		({addr1}|{addr2}|{addr3}|"::")
 %%
 
 <STRING>[^ \t\n;]+ {
-	pkixip_lval.string = strdup(yytext);
+	pkixip_ext_lval.string = strdup(yytext);
 	BEGIN 0;
 	return T_STRING;
 }
@@ -104,7 +104,7 @@ capriv			{ BEGIN STRING; return T_CAPRIV; }
 		return T_BAD_TOKEN;
 	}
 
-	pkixip_lval.addr4 = addr;
+	pkixip_ext_lval.addr4 = addr;
 	return T_IPV4_ADDR;
 }
 
@@ -119,12 +119,12 @@ capriv			{ BEGIN STRING; return T_CAPRIV; }
 		return T_BAD_TOKEN;
 	}
 
-	pkixip_lval.addr6 = addr;
+	pkixip_ext_lval.addr6 = addr;
 	return T_IPV6_ADDR;
 }
 
 {number} {
-	pkixip_lval.num = atoi(yytext);
+	pkixip_ext_lval.num = atoi(yytext);
 	return T_NUMBER;
 }
 

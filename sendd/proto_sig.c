@@ -107,7 +107,7 @@ snd_proto_verify_sig(uint8_t *nd_so, uint8_t *key, int klen,
 
 uint8_t *
 snd_proto_calc_sig(struct ip6_hdr *iph, struct icmp6_hdr *icmp, int tlen,
-    int *slen, struct snd_cga_params *p)
+    unsigned int *slen, struct snd_cga_params *p)
 {
 	struct snd_pseudo_hdr psh[1];
 	struct iovec iov[2];
@@ -120,5 +120,5 @@ snd_proto_calc_sig(struct ip6_hdr *iph, struct icmp6_hdr *icmp, int tlen,
 	iov[1].iov_len = tlen - sizeof (*iph);
 
 	/* Calculate signature */
-	return (p->sigmeth->sign(iov, ARR_SZ(iov), slen, p->key));
+	return (p->sigmeth->sign(iov, 2, slen, p->key));
 }

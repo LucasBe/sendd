@@ -145,6 +145,7 @@ void snd_cleanup(void)
 	snd_ssl_fini();
 	snd_params_fini();
 	snd_config_fini();
+  pkixip_free();
 }
 
 static void usage(const char *this)
@@ -247,12 +248,17 @@ int main(int argc, char **argv)
 	    snd_certpath_init() < 0 ||
 	    os_specific_init() < 0 ||
 	    snd_addr_init() < 0 ||
-	    snd_sigmeth_init() < 0 ||
-	    snd_replace_non_cga_linklocals() < 0) {
+	    snd_sigmeth_init() < 0) {
 		snd_cleanup();
 		return EXIT_FAILURE;
 	}
+  
   if(snd_all) snd_enable_all();
+
+  if(snd_replace_non_cga_linklocals() < 0) {
+		snd_cleanup();
+		return EXIT_FAILURE;  
+  }
 
 	thrpool_set_max(snd_conf_get_int(snd_thrpool_max));
 

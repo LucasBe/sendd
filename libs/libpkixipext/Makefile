@@ -9,8 +9,8 @@ RUNTESTS= test
 
 LDLIBS= -lcrypto -llog
 
-YFLAGS= -d -p pkixip_
-LFLAGS= -Ppkixip_
+YFLAGS= -d -p pkixip_ext_
+LFLAGS= -Ppkixip_ext_
 EXTRACLEAN= y.tab.h
 
 include ../Makefile.lib.common

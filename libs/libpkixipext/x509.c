@@ -72,8 +72,7 @@ pthread_mutex_t stores_lock = PTHREAD_MUTEX_INITIALIZER;
 static STACK_OF(X509) *mychain;
 
 /* Lifted from openssl x509_lu.c */
-static int
-x509_object_cmp(X509_OBJECT **a, X509_OBJECT **b)
+static int x509_object_cmp(X509_OBJECT **a, X509_OBJECT **b)
 {
  	int ret;
 
@@ -93,8 +92,7 @@ x509_object_cmp(X509_OBJECT **a, X509_OBJECT **b)
 	return ret;
 }
 
-static int
-x509_bysubj_cmp(const char * const *a, const char * const *b)
+static int x509_bysubj_cmp(const char * const *a, const char * const *b)
 {
 	X509 *n1, *n2;
 
@@ -104,8 +102,7 @@ x509_bysubj_cmp(const char * const *a, const char * const *b)
 			     X509_get_subject_name(n2));
 }
 
-void
-pkixip_ssl_err(const char *func, const char *context) {
+void pkixip_ssl_err(const char *func, const char *context) {
 	int err, i;
 #ifdef	DEBUG
 	char buf[120];
@@ -120,8 +117,7 @@ pkixip_ssl_err(const char *func, const char *context) {
 	}
 }
 
-X509 *
-pkixip_load_cert(const char *f)
+X509 *pkixip_load_cert(const char *f)
 {
 	FILE *fp;
 	X509 *x = NULL;
@@ -140,8 +136,8 @@ pkixip_load_cert(const char *f)
 
 	return (x);
 }
-int
-pkixip_sign(X509 *x, X509 *cax, EVP_PKEY *pkey)
+
+int pkixip_sign(X509 *x, X509 *cax, EVP_PKEY *pkey)
 {
 	if (!X509_set_issuer_name(x, X509_get_subject_name(cax))) {
 		pkixip_ssl_err(__FUNCTION__, "Setting issuer name");
@@ -166,8 +162,7 @@ pkixip_sign(X509 *x, X509 *cax, EVP_PKEY *pkey)
 	return (0);
 }
 
-int
-pkixip_write_ext(X509 *x, const char *f, IPAddrBlocks *ipb, X509 *cax,
+int pkixip_write_ext(X509 *x, const char *f, IPAddrBlocks *ipb, X509 *cax,
     EVP_PKEY *pkey)
 {
 	FILE *fp;
@@ -224,8 +219,7 @@ pkixip_write_ext(X509 *x, const char *f, IPAddrBlocks *ipb, X509 *cax,
 	return (rv);
 }
 
-EVP_PKEY *
-pkixip_load_pkey(const char *f)
+EVP_PKEY *pkixip_load_pkey(const char *f)
 {
 	EVP_PKEY *pkey;
 	FILE *fp;
@@ -243,8 +237,7 @@ pkixip_load_pkey(const char *f)
 	return (pkey);
 }
 
-static STACK_OF(X509_OBJECT) *
-pkixip_get_store(int handle)
+static STACK_OF(X509_OBJECT) *pkixip_get_store(int handle)
 {
 	if (handle >= PKIXIP_MAX_STORES || handle < 0) {
 		DBG(&dbg_x509, "Handle out of range (%d)", handle);
@@ -254,8 +247,7 @@ pkixip_get_store(int handle)
 	return (stores[handle]);
 }
 
-void
-pkixip_walk_store(int (*cb)(X509 *, void *), void *cookie, int handle)
+void pkixip_walk_store(int (*cb)(X509 *, void *), void *cookie, int handle)
 {
 	STACK_OF(X509_OBJECT) *objs;
 	int i;
@@ -279,8 +271,7 @@ done:
 	pthread_mutex_unlock(&stores_lock);
 }
 
-void *
-pkixip_find_cert(void *k, int handle)
+void *pkixip_find_cert(void *k, int handle)
 {
 	STACK_OF(X509_OBJECT) *store;
 	int i;
@@ -303,8 +294,7 @@ done:
 }
 
 /* Caller must hold stores_lock */
-static int
-pkixip_do_add_store(int handle, int (*cmp)(X509_OBJECT **, X509_OBJECT **),
+static int pkixip_do_add_store(int handle, int (*cmp)(X509_OBJECT **, X509_OBJECT **),
     STACK_OF(X509_OBJECT) *objs)
 {
 	if (objs == NULL && (objs = sk_X509_OBJECT_new(cmp)) == NULL) {
@@ -316,8 +306,7 @@ pkixip_do_add_store(int handle, int (*cmp)(X509_OBJECT **, X509_OBJECT **),
 	return (0);
 }
 
-int
-pkixip_add_store(int *handle, int (*cmp)(X509_OBJECT **, X509_OBJECT **))
+int pkixip_add_store(int *handle, int (*cmp)(X509_OBJECT **, X509_OBJECT **))
 {
 	int r = 0;
 
@@ -341,8 +330,7 @@ done:
 	return (r);
 }
 
-X509_STORE_CTX *
-pkixip_get_store_ctx(void)
+X509_STORE_CTX *pkixip_get_store_ctx()
 {
 	X509_STORE *st;
 
@@ -391,8 +379,7 @@ static void noop_free(void *x) {}
  * seems to free the certs in the chain, which should cause problems if
  * we wish to continue using the store. Need to double check.
  */
-void
-pkixip_store_ctx_light_cleanup(X509_STORE_CTX *ctx)
+void pkixip_store_ctx_light_cleanup(X509_STORE_CTX *ctx)
 {
 //	X509_STORE_CTX_cleanup(ctx);
 
@@ -411,8 +398,7 @@ pkixip_store_ctx_light_cleanup(X509_STORE_CTX *ctx)
 */
 }
 
-int
-pkixip_add2stores_file(const char *f)
+int pkixip_add2stores_file(const char *f)
 {
 	X509 *x;
 	FILE *fp;
@@ -439,8 +425,7 @@ done:
 	return (rv);
 }
 
-int
-pkixip_add2stores_cert(X509 *x)
+int pkixip_add2stores_cert(X509 *x)
 {
 	int i, r = 0;
 	X509_STORE_CTX *ctx;
@@ -487,20 +472,17 @@ done:
 	return (r);
 }
 
-void
-pkixip_set_wrapper(void *(*w)(X509 *))
+void pkixip_set_wrapper(void *(*w)(X509 *))
 {
 	wrap_store_cert = w;
 }
 
-void
-pkixip_set_trustanchor_cb(void (*cb)(X509 *))
+void pkixip_set_trustanchor_cb(void (*cb)(X509 *))
 {
 	trustanchor_cb = cb;
 }
 
-int
-pkixip_my_chain_init(X509 *mycert)
+int pkixip_my_chain_init(X509 *mycert)
 {
 	X509_STORE_CTX *ctx;
 	int r = 0;
@@ -538,14 +520,12 @@ done:
 	return (r);
 }
 
-STACK_OF(X509) *
-pkixip_get_mychain(void)
+STACK_OF(X509) *pkixip_get_mychain(void)
 {
 	return (mychain);
 }
 
-int
-pkixip_has_ext(X509 *x)
+int pkixip_has_ext(X509 *x)
 {
 	if (X509_get_ext_by_NID(x, pkix_ip_ext_method.ext_nid, -1) != -1) {
 		return (1);
@@ -553,8 +533,7 @@ pkixip_has_ext(X509 *x)
 	return (0);
 }
 
-int
-pkixip_x509_init(void)
+int pkixip_x509_init()
 {
 #ifdef	DEBUG
 	struct dlog_desc *dbgs[] = {
@@ -582,4 +561,9 @@ pkixip_x509_init(void)
 	}
 
 	return (0);
+}
+
+void pkixip_x509_free()
+{
+  OBJ_cleanup();
 }

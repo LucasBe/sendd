@@ -16,6 +16,7 @@ struct s_iface {
   char name[IF_NAMESIZE+1];
 	unsigned int ifi;
   unsigned int mtu;
+  unsigned int flags;
   int send_enabled;
   //... counters;  
   void *os_data;

@@ -45,8 +45,8 @@ struct dlog_desc dbg_parse = {
 	.ctx = PKIXIP_EXT_CTX
 };
 
-extern int pkixip_parse(void);
-extern FILE *pkixip_in;
+extern int pkixip_ext_parse();
+extern FILE *pkixip_ext_in;
 
 IPAddrBlocks *parse_ipb;
 struct pkixip_config *configs;
@@ -56,19 +56,19 @@ pkixip_read_config(const char *f, struct pkixip_config *cf, IPAddrBlocks **ipb)
 {
 	int r = -1;
 
-	if ((pkixip_in = fopen(f, "r")) == NULL) {
+	if ((pkixip_ext_in = fopen(f, "r")) == NULL) {
 		DBG(&dbg_parse, "fopen: %s", strerror(errno));
 		return (-1);
 	}
 
 	if (!(parse_ipb = IPAddrBlocks_new())) {
 		applog(LOG_CRIT, "%s: no memory", __FUNCTION__);
-		fclose(pkixip_in);
+		fclose(pkixip_ext_in);
 		return (-1);
 	}
 	configs = cf;
 
-	if (pkixip_parse() != 0) {
+	if (pkixip_ext_parse() != 0) {
 		IPAddrBlocks_free(parse_ipb);
 		parse_ipb = NULL;
 		goto done;
@@ -79,7 +79,7 @@ pkixip_read_config(const char *f, struct pkixip_config *cf, IPAddrBlocks **ipb)
 		*ipb = parse_ipb;
 	}
 done:
-	fclose(pkixip_in);
+	fclose(pkixip_ext_in);
 	return (r);
 }
 
