@@ -66,6 +66,7 @@ int snd_enable_iface(const char *name);
 void snd_enable_all();
 void snd_dump_ifaces();
 int snd_addr_init();
+int snd_addr_get();
 int snd_addr_free();
 
 #endif /* _SEND_ADDR_H */

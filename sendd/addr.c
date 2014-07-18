@@ -443,18 +443,24 @@ int snd_addr_init()
     return FAILURE;
   }  
 
+  DBG(&dbg, "success");
+  return SUCCESS;
+}
+
+int snd_addr_get()
+{
   if(os_get_ifaces() != SUCCESS) {
     DBG(&dbg, "os_get_ifaces() failed");
     return FAILURE;
   }
 
 	if (os_get_addrs() != SUCCESS) {
-    DBG(&dbg, "get_addrs() failed");
+    DBG(&dbg, "os_get_addrs() failed");
     return FAILURE;
   }
   
   DBG(&dbg, "success");
-  return SUCCESS;
+  return SUCCESS;    
 }
 
 int snd_addr_free()

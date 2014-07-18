@@ -233,5 +233,7 @@ snd_init_cert(void)
 	pkixip_set_wrapper(wrap_cert);
 	pkixip_set_trustanchor_cb(set_trustanchor);
 
+  DBG(&dbg, "success");
+
 	return (0);
 }

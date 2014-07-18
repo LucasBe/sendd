@@ -59,8 +59,6 @@ struct dlog_desc dbg_snd = {
 };
 #endif
 
-//static DEFINE_LIST_HEAD(ifaces);
-//static DEFINE_LIST_HEAD(ip6addrs);
 static int cfd = -1; /* Console file descriptor */
 
 static struct timeval *get_next_wait(struct timeval *tvb)
@@ -176,6 +174,9 @@ int main(int argc, char **argv)
 	}
 #endif
 
+  if (snd_addr_init() != SUCCESS)
+    return EXIT_FAILURE;
+
 	while (argc > 1 && (c = getopt(argc, argv, "fdc:i:l:V")) != -1) {
 		switch (c)
     {
@@ -187,6 +188,7 @@ int main(int argc, char **argv)
   			break;
   		case 'i':
   			if (snd_enable_iface(optarg) < 0) {
+          snd_addr_free();
   				return EXIT_FAILURE;
   			}
         snd_all--;
@@ -201,10 +203,12 @@ int main(int argc, char **argv)
   			break;
   		case 'V':
   			printf("%s (SEND rfc3971)\n", SND_VERSION_STR);
+        snd_addr_free();
   			return EXIT_SUCCESS;
   		case 'h':
   		default:
   			usage(*argv);
+        snd_addr_free();
   			return EXIT_FAILURE;
 		}
 	}
@@ -217,6 +221,7 @@ int main(int argc, char **argv)
 		};
 
 		if (applog_register(dbgs) < 0) {
+      snd_addr_free();
 			return EXIT_FAILURE;
 		}
 		applog_enable_level(dbg_snd.ctx, dbg_snd.desc);
@@ -229,6 +234,7 @@ int main(int argc, char **argv)
 	if (signal(SIGINT, sighandler) < 0 ||
 	    signal(SIGTERM, sighandler) < 0) {
 		applog(LOG_CRIT, "signal: %s", strerror(errno));
+    snd_addr_free();
 		return EXIT_FAILURE;
 	}
 
@@ -247,7 +253,7 @@ int main(int argc, char **argv)
 	    snd_ra_init() < 0 ||
 	    snd_certpath_init() < 0 ||
 	    os_specific_init() < 0 ||
-	    snd_addr_init() < 0 ||
+	    snd_addr_get() < 0 ||
 	    snd_sigmeth_init() < 0) {
 		snd_cleanup();
 		return EXIT_FAILURE;
@@ -268,6 +274,7 @@ int main(int argc, char **argv)
 #ifdef	USE_CONSOLE
 	else {
 		if (snd_console_init() < 0) {
+      snd_cleanup();
 			return EXIT_FAILURE;
 		}
 		cfd = 0;
