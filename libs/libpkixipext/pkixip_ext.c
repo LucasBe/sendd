@@ -42,9 +42,9 @@ const char *pkixip_version =
 
 int pkixip_init()
 {
-	OpenSSL_add_all_algorithms();
 	ERR_load_crypto_strings();
-	ERR_load_X509_strings();
+	OpenSSL_add_all_algorithms();
+  CONF_modules_load_file(NULL, NULL, 0);
 
 	if (pkixip_config_init() < 0) {
 		return (-1);
@@ -62,5 +62,9 @@ int pkixip_init()
 void pkixip_free()
 {
   pkixip_x509_free();
+
+  CONF_modules_free();
+  EVP_cleanup();
+  ERR_free_strings();
 }
 

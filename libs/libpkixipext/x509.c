@@ -565,5 +565,6 @@ int pkixip_x509_init()
 
 void pkixip_x509_free()
 {
+  X509V3_EXT_cleanup();
   OBJ_cleanup();
 }
